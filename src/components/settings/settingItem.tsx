@@ -8,7 +8,7 @@ type SettingItemProps = {
   onChange: () => void;
 };
 
-const SettingItem: React.FC<SettingItemProps> = ({
+const SettingItemComponent: React.FC<SettingItemProps> = ({
   title,
   description,
   isChecked,
@@ -112,4 +112,4 @@ const Container = styled.div`
       }
     }
 `;
-export default SettingItem;
+export default SettingItemComponent;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import SettingItem from "./SettingItem";
 import axios from "axios";
 import CounterComponent from "../Counter";
+import SettingItemComponent from "./settingItem";
 
 const SettingSection: React.FC = () => {
   const [settings, setSettings] = useState([
@@ -266,7 +266,7 @@ const SettingSection: React.FC = () => {
             </div>
 
             {settings.map((setting) => (
-              <SettingItem
+              <SettingItemComponent
                 key={setting.id}
                 title={setting.title}
                 description={setting.description}
