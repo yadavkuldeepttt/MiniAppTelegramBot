@@ -3,7 +3,7 @@ import "./App.css";
 import styled from "styled-components";
 import NavbarComponent from "./components/Navbar";
 import TabComponent from "./components/Tab";
-import Home from "./Home";
+import Home from "./pages/Home";
 
 const App: React.FC = () => {
   return (

@@ -76,10 +76,7 @@ const SettingSection: React.FC = () => {
         );
         const data = response.data;
 
-        console.log("====================================");
-        console.log(data, "response data found");
-        console.log("====================================");
-
+  
         // Map response data to match the settings structure
         const updatedSettings = [
           {
