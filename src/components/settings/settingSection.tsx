@@ -76,9 +76,12 @@ const SettingSection: React.FC = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `https://223f-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`
+          `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`
         );
         const data = response.data;
+
+        console.log(data,"data getting from backened ");
+        
 
         // Map response data to match the settings structure
         const updatedSettings = [
