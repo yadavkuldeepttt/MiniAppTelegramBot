@@ -67,12 +67,16 @@ const SettingSection: React.FC = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const chatId = urlParams.get("chatId");
 
+  console.log('====================================');
+  console.log(chatId,"chatId");
+  console.log('====================================');
+
   useEffect(() => {
     const fetchSettings = async () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/group-settings/${chatId}`
+          `http://192.168.1.5:5000/api/group-settings/${chatId}`
         );
         const data = response.data;
 
