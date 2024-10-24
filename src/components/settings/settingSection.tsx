@@ -75,12 +75,24 @@ const SettingSection: React.FC = () => {
     const fetchSettings = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`
+        const response = await fetch(
+          `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          }
         );
-        const data = response.data;
-
-        console.log(data,"data getting from backened ");
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        console.log(data, "data getting from backend");
+  
         
 
         // Map response data to match the settings structure
@@ -89,59 +101,59 @@ const SettingSection: React.FC = () => {
             id: 1,
             title: "Chat mute",
             description: "Mutes the chat during a raid",
-            isChecked: data.mute,
+            isChecked: data?.mute,
           },
           {
             id: 2,
             title: "Finder",
             description: "Raid suggestions from X links",
-            isChecked: data.finderEnabled,
+            isChecked: data?.finderEnabled,
           },
           {
             id: 3,
             title: "Live stats",
             description: "Interaction messages in the chat",
-            isChecked: data.liveStats,
+            isChecked: data?.liveStats,
           },
           {
             id: 4,
             title: "Tweet preview",
             description: "Show a tweet preview in the chat",
-            isChecked: data.tweetPreview,
+            isChecked: data?.tweetPreview,
           },
           {
             id: 5,
             title: "Raid duration",
             description: "Elapsed time on raid finish",
-            isChecked: data.raidDuration,
+            isChecked: data?.raidDuration,
           },
           {
             id: 6,
             title: "Raid summary",
             description: "Post raid summary in the chat",
-            isChecked: data.raidSummary,
+            isChecked: data?.raidSummary,
           },
           {
             id: 7,
             title: "Verification-Only",
             description:
               "Require raiders to have their X account verified in order to smash the raids.",
-            isChecked: data.verificationOnly,
+            isChecked: data?.verificationOnly,
           },
           {
             id: 8,
             title: "Forward Raids",
             description: "Forward raids to RaidSharks private raiding groups.",
-            isChecked: data.forwardRaids,
+            isChecked: data?.forwardRaids,
           },
         ];
 
         // Update the state with fetched settings
         setSettings(updatedSettings);
-        setTarget(data.target);
-        setRepostCount(data.repostCount);
-        setPresetTags(data.raidSettings.presetTags);
-        setInputValue(data.raidSettings.presetTags);
+        setTarget(data?.target);
+        setRepostCount(data?.repostCount);
+        setPresetTags(data?.raidSettings.presetTags);
+        setInputValue(data?.raidSettings.presetTags);
       } catch (error) {
         console.error("Error fetching settings:", error);
         setError("Failed to load settings");
