@@ -76,11 +76,10 @@ const SettingSection: React.FC = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://192.168.1.5:5000/api/group-settings/${chatId}`
+          `https://223f-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`
         );
         const data = response.data;
 
-  
         // Map response data to match the settings structure
         const updatedSettings = [
           {
