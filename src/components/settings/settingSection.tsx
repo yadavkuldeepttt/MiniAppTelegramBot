@@ -64,6 +64,7 @@ const SettingSection: React.FC = () => {
   const [error, setError] = useState(null);
   const [presetTags, setPresetTags] = useState(["@FreedomShillingBot"]);
   const [inputValue, setInputValue] = useState(presetTags.join(" ")); // Local state for input
+  
   const urlParams = new URLSearchParams(window.location.search);
   const chatId = urlParams.get("chatId");
 
@@ -74,9 +75,23 @@ const SettingSection: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       setLoading(true);
+
+      var requestOptions = {
+        method: 'GET',
+        headers:{
+          'content-type':'application/json'
+        }
+     };
+     
       try {
+      // const response =  await fetch(`https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings?${chatId}`, requestOptions)
+      //   .then(response => response.text())
+      //   .then(result => console.log(result))
+      //   .catch(error => console.log('error', error));
         const response = await fetch(
-          `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`,
+          // `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`,
+           `http://localhost:5000/api/group-settings/${chatId}`,
+          // `https://jsonplaceholder.typicode.com/todos/1`,
           {
             method: 'GET',
             headers: {
@@ -85,6 +100,10 @@ const SettingSection: React.FC = () => {
             },
           }
         );
+
+        console.log('====================================');
+        console.log(response,"response getting");
+        console.log('====================================');
   
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
