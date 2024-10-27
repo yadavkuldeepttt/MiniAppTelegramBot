@@ -5,114 +5,109 @@ import axios from "axios";
 import CounterComponent from "../Counter";
 import SettingItemComponent from "./settingItem";
 
+let settingsData = [
+  {
+    id: 1,
+    title: "Chat mute",
+    description: "Mutes the chat during a raid",
+    isChecked: false,
+  },
+  {
+    id: 2,
+    title: "Finder",
+    description: "Find Raid",
+    isChecked: true,
+  },
+  {
+    id: 3,
+    title: "Lock Chat",
+    description: "Lock Chat during a raid",
+    isChecked: false,
+  },
+  {
+    id: 4,
+    title: "Live stats",
+    description: "Interaction messages in the chat",
+    isChecked: false,
+  },
+  {
+    id: 5,
+    title: "Tweet preview ",
+    description: "Show a tweet preview in the chat",
+    isChecked: true,
+  },
+  {
+    id: 6,
+    title: "Raid duration",
+    description: "Elapsed time on raid finish",
+    isChecked: false,
+  },
+  {
+    id: 7,
+    title: "Raid summary",
+    description: "Post raid summary in the chat",
+    isChecked: false,
+  },
+  {
+    id: 8,
+    title: "Verification-Only",
+    description:
+      "Require raiders to have their X account verified in order to smash the raids.",
+    isChecked: false,
+  },
+  {
+    id: 9,
+    title: "Forward Raids",
+    description: "Forward raids to RaidSharks private raiding groups.",
+    isChecked: false,
+  },
+];
+
 const SettingSection: React.FC = () => {
-  const [settings, setSettings] = useState([
-    {
-      id: 1,
-      title: "Chat mute",
-      description: "Mutes the chat during a raid",
-      isChecked: false,
-    },
-    {
-      id: 2,
-      title: "Finder",
-      description: "Raid suggestions from X links",
-      isChecked: true,
-    },
-    {
-      id: 3,
-      title: "Live stats",
-      description: "Interaction messages in the chat",
-      isChecked: false,
-    },
-    {
-      id: 4,
-      title: "Tweet preview ",
-      description: "Show a tweet preview in the chat",
-      isChecked: true,
-    },
-    {
-      id: 5,
-      title: "Raid duration",
-      description: "Elapsed time on raid finish",
-      isChecked: false,
-    },
-    {
-      id: 6,
-      title: "Raid summary",
-      description: "Post raid summary in the chat",
-      isChecked: false,
-    },
-    {
-      id: 7,
-      title: "Verification-Only",
-      description:
-        "Require raiders to have their X account verified in order to smash the raids.",
-      isChecked: false,
-    },
-    {
-      id: 8,
-      title: "Forward Raids",
-      description: "Forward raids to RaidSharks private raiding groups.",
-      isChecked: false,
-    },
-  ]);
+  const [settings, setSettings] = useState(settingsData);
 
   const [target, setTarget] = useState(100);
   const [repostCount, setRepostCount] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [presetTags, setPresetTags] = useState(["@FreedomShillingBot"]);
-  const [inputValue, setInputValue] = useState(presetTags.join(" ")); // Local state for input
-  
+  const [inputValue, setInputValue] = useState(presetTags); // Local state for input
+
   const urlParams = new URLSearchParams(window.location.search);
   const chatId = urlParams.get("chatId");
-
-  console.log('====================================');
-  console.log(chatId,"chatId");
-  console.log('====================================');
 
   useEffect(() => {
     const fetchSettings = async () => {
       setLoading(true);
 
-      var requestOptions = {
-        method: 'GET',
-        headers:{
-          'content-type':'application/json'
-        }
-     };
-     
       try {
-      // const response =  await fetch(`https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings?${chatId}`, requestOptions)
-      //   .then(response => response.text())
-      //   .then(result => console.log(result))
-      //   .catch(error => console.log('error', error));
+        // const response =  await fetch(`https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings?${chatId}`, requestOptions)
+        //   .then(response => response.text())
+        //   .then(result => console.log(result))
+        //   .catch(error => console.log('error', error));
         const response = await fetch(
           // `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`,
-           `http://localhost:5000/api/group-settings/${chatId}`,
+          `http://localhost:5000/api/group-settings/${chatId}`,
           // `https://jsonplaceholder.typicode.com/todos/1`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
           }
         );
 
-        console.log('====================================');
-        console.log(response,"response getting");
-        console.log('====================================');
-  
+        console.log("====================================");
+        console.log(response, "response getting");
+        console.log("====================================");
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-  
+
         const data = await response.json();
         console.log(data, "data getting from backend");
-  
-        
 
         // Map response data to match the settings structure
         const updatedSettings = [
@@ -120,54 +115,61 @@ const SettingSection: React.FC = () => {
             id: 1,
             title: "Chat mute",
             description: "Mutes the chat during a raid",
-            isChecked: data?.mute,
+            isChecked: data.mute,
           },
           {
             id: 2,
             title: "Finder",
-            description: "Raid suggestions from X links",
-            isChecked: data?.finderEnabled,
+            description: "Find Raid",
+            isChecked: data.finderEnabled,
           },
           {
             id: 3,
-            title: "Live stats",
-            description: "Interaction messages in the chat",
-            isChecked: data?.liveStats,
+            title: "Lock Chat",
+            description: "Lock Chat during a raid",
+            isChecked: data.chatLocked,
           },
           {
             id: 4,
-            title: "Tweet preview",
-            description: "Show a tweet preview in the chat",
-            isChecked: data?.tweetPreview,
+            title: "Live stats",
+            description: "Interaction messages in the chat",
+            isChecked: data.liveStats,
           },
           {
             id: 5,
-            title: "Raid duration",
-            description: "Elapsed time on raid finish",
-            isChecked: data?.raidDuration,
+            title: "Tweet preview",
+            description: "Show a tweet preview in the chat",
+            isChecked: data.tweetPreview,
           },
           {
             id: 6,
-            title: "Raid summary",
-            description: "Post raid summary in the chat",
-            isChecked: data?.raidSummary,
+            title: "Raid duration",
+            description: "Elapsed time on raid finish",
+            isChecked: data.raidDuration,
           },
           {
             id: 7,
-            title: "Verification-Only",
-            description:
-              "Require raiders to have their X account verified in order to smash the raids.",
-            isChecked: data?.verificationOnly,
+            title: "Raid summary",
+            description: "Post raid summary in the chat",
+            isChecked: data.raidSummary,
           },
           {
             id: 8,
+            title: "Verification-Only",
+            description:
+              "Require raiders to have their X account verified in order to smash the raids.",
+            isChecked: data.verificationOnly,
+          },
+          {
+            id: 9,
             title: "Forward Raids",
             description: "Forward raids to RaidSharks private raiding groups.",
-            isChecked: data?.forwardRaids,
+            isChecked: data.forwardRaids,
           },
         ];
 
         // Update the state with fetched settings
+
         setSettings(updatedSettings);
         setTarget(data?.target);
         setRepostCount(data?.repostCount);
@@ -200,6 +202,7 @@ const SettingSection: React.FC = () => {
         }
       );
 
+      console.log(response, "response");
 
       setTarget(newTarget);
       setRepostCount(newRepostCount);
@@ -213,17 +216,17 @@ const SettingSection: React.FC = () => {
 
   const handleIncrement = (type) => {
     if (type === "target") {
-      updateSettings(target + 10, repostCount);
+      updateSettings(target + 10, repostCount, settings, presetTags);
     } else {
-      updateSettings(target, repostCount + 1);
+      updateSettings(target, repostCount + 1, settings, presetTags);
     }
   };
 
   const handleDecrement = (type) => {
     if (type === "target" && target > 0) {
-      updateSettings(target - 10, repostCount);
+      updateSettings(target - 10, repostCount, settings, presetTags);
     } else if (type === "repostCount" && repostCount > 0) {
-      updateSettings(target, repostCount - 1);
+      updateSettings(target, repostCount - 1, settings, presetTags);
     }
   };
 
@@ -243,8 +246,7 @@ const SettingSection: React.FC = () => {
   const handlePresetTags = () => {
     const tags = inputValue.split(","); // split the input if there are multiple tags
     setPresetTags(tags);
-    console.log(tags,"tags");
-    
+    console.log(tags, "tags");
 
     // Ensure you pass all the necessary parameters to updateSettings
     updateSettings(target, repostCount, settings, tags);
@@ -299,15 +301,16 @@ const SettingSection: React.FC = () => {
               </div>
             </div>
 
-            {settings.map((setting) => (
-              <SettingItemComponent
-                key={setting.id}
-                title={setting.title}
-                description={setting.description}
-                isChecked={setting.isChecked}
-                onChange={() => handleToggle(setting.id)}
-              />
-            ))}
+            {settings &&
+              settings.map((setting) => (
+                <SettingItemComponent
+                  key={setting.id}
+                  title={setting.title}
+                  description={setting.description}
+                  isChecked={setting.isChecked}
+                  onChange={() => handleToggle(setting.id)}
+                />
+              ))}
           </div>
         )}
       </div>
