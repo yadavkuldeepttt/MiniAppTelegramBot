@@ -109,7 +109,7 @@ const SettingSection: React.FC = () => {
         //   .catch(error => console.log('error', error));
         const response = await fetch(
           // `https://ad2c-117-235-203-177.ngrok-free.app/api/group-settings/${chatId}`,
-          `http://localhost:5000/api/group-settings/${chatId}`,
+          `http://localhost:5000/api/group-settings/${userId}`,
           // `https://jsonplaceholder.typicode.com/todos/1`,
           {
             method: "GET",
