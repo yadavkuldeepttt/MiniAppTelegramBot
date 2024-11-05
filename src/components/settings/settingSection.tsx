@@ -76,7 +76,7 @@ const SettingSection: React.FC = () => {
   const [presetTags, setPresetTags] = useState(["@FreedomShillingBot"]);
   const [inputValue, setInputValue] = useState(presetTags); // Local state for input
 
-  const [chatId, setChatId] = useState(null);
+  
 
   // Initialize Telegram WebApp
    const tg = window.Telegram.WebApp;
