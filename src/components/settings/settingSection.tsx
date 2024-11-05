@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-
+import io from 'socket.io-client';
 import axios from "axios";
 import CounterComponent from "../Counter";
 import SettingItemComponent from "./settingItem";
@@ -34,7 +34,7 @@ let settingsData = [
     id: 5,
     title: "Tweet preview ",
     description: "Show a tweet preview in the chat",
-    isChecked: true,
+    isChecked: false,
   },
   {
     id: 6,
@@ -63,6 +63,9 @@ let settingsData = [
   },
 ];
 
+const socket = io("http://localhost:5000"); // URL of the backend server
+
+
 const SettingSection: React.FC = () => {
   const [settings, setSettings] = useState(settingsData);
 
@@ -73,11 +76,34 @@ const SettingSection: React.FC = () => {
   const [presetTags, setPresetTags] = useState(["@FreedomShillingBot"]);
   const [inputValue, setInputValue] = useState(presetTags); // Local state for input
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const chatId = urlParams.get("chatId");
+  const [chatId, setChatId] = useState(null);
+
+  useEffect(() => {
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    
+    // Listen for 'chatIdUpdate' event
+    socket.on("chatIdUpdate", (data) => {
+      console.log('====================================');
+      console.log(data,"data chatid kksks");
+      console.log('====================================');
+      console.log("Received chatId:", data.chatId);
+      setChatId(data.chatId);
+    });
+
+
+    console.log('====================================');
+    console.log("################################");
+    console.log('====================================');
+
+    // Cleanup on unmount
+    return () => socket.off("chatIdUpdate");
+  }, []);
+
 
   useEffect(() => {
     const fetchSettings = async () => {
+      if (!chatId) return; // Only fetch if chatId is available
+
       setLoading(true);
 
       try {
@@ -99,7 +125,7 @@ const SettingSection: React.FC = () => {
         );
 
         console.log("====================================");
-        console.log(response, "response getting");
+        console.log(response, "response getting after adding chatid");
         console.log("====================================");
 
         if (!response.ok) {
