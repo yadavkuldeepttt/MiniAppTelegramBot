@@ -78,26 +78,23 @@ const SettingSection: React.FC = () => {
 
   const [chatId, setChatId] = useState(null);
 
-  useEffect(() => {
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-    
-    // Listen for 'chatIdUpdate' event
-    socket.on("chatIdUpdate", (data) => {
-      console.log('====================================');
-      console.log(data,"data chatid kksks");
-      console.log('====================================');
-      console.log("Received chatId:", data.chatId);
-      setChatId(data.chatId);
-    });
+  // Initialize Telegram WebApp
+   const tg = window.Telegram.WebApp;
+
+   console.log('====================================');
+   console.log(tg,"tg");
+   console.log('====================================');
+
+   // Access initData and other WebApp data
+   const initData = tg.initDataUnsafe;
+
+   console.log(initData,"init data");
+   
+   const userId = initData?.user?.id;
+   const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
+   const chatId = initData?.chat?.id;
 
 
-    console.log('====================================');
-    console.log("################################");
-    console.log('====================================');
-
-    // Cleanup on unmount
-    return () => socket.off("chatIdUpdate");
-  }, []);
 
 
   useEffect(() => {
