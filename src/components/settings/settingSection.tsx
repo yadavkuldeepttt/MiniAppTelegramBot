@@ -63,7 +63,6 @@ let settingsData = [
   },
 ];
 
-const socket = io("http://localhost:5000"); // URL of the backend server
 
 
 const SettingSection: React.FC = () => {
