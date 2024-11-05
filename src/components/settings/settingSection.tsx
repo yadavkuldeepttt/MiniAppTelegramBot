@@ -91,7 +91,7 @@ const SettingSection: React.FC = () => {
    
    const userId = initData?.user?.id;
    const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
-   const chatId = initData?.chat?.id;
+   const chatId = initData?.user?.id;
 
 
 
