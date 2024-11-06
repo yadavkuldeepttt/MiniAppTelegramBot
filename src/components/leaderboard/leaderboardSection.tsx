@@ -1,43 +1,119 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
 
 const LeaderboardSection: React.FC = () => {
-  // Local state to track active tab
   const [activeTab, setActiveTab] = useState<string>("AllTime");
+  const [leaderboardData, setLeaderboardData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const tabs = ["All Time", "Month", "Day"];
 
-  // List of tabs
-  const tabs = ["All Time", "Month", "Week", "Day"];
+  const tg = window.Telegram.WebApp;
+
+
+   // Access initData and other WebApp data
+   const initData = tg.initDataUnsafe;   
+   const userId = initData?.user?.id;
+   const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
+   const chatId = initData?.chat?.id;
+
+   console.log(userId,"userId");
+   console.log('====================================');
+   console.log(chatId,"chat id ");
+   console.log('====================================');
+   
+
+
+
+  useEffect(() => {
+    // Send the user's request to get admins
+    const requestGroupAdmins = async () => {
+      try {
+        // Assuming you have an endpoint `/getGroupAdmins` on your server
+        const response = await fetch("http://localhost:5000/getGroupAdmins", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            // Potentially include other data if available
+          }),
+        });
+        const data = await response.json();
+        console.log("Admin data:", data);
+      } catch (error) {
+        console.error("Error fetching admins:", error);
+      }
+    };
+
+    const fetchLeaderboardData = async () => {
+      setLoading(true);
+      try {
+        let endpoint;
+        switch (activeTab) {
+          case "Day":
+            endpoint = "http://localhost:5000/api/leaderboard/today";
+            break;
+          case "Month":
+            endpoint = "http://localhost:5000/api/leaderboard/month";
+            break;
+          default:
+            endpoint = "http://localhost:5000/api/leaderboard/all-time";
+            break;
+        }
+
+        const response = await axios.get(endpoint);
+        console.log("====================================");
+        console.log(response, "response");
+        console.log("====================================");
+        setLeaderboardData(response.data);
+      } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    requestGroupAdmins();
+    // fetchLeaderboardData();
+  }, [activeTab]);
+
   return (
-    <>
-      <Container>
-        <div className="leaderboardSection">
-          <h2>Leaderboard</h2>
-          <div className="leaderboardTabs">
-            {tabs.map((tab) => (
-              <TabButton
-                key={tab}
-                className={activeTab === tab ? "active" : ""}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </TabButton>
-            ))}
-          </div>
-          <div className="activetabsection">
-            <span>No interactions to display yet.</span>
-
-            <span>
-              Be the first to engage with the raid and make it to the
-              leaderboard!
-            </span>
-          </div>
+    <Container>
+      <div className="leaderboardSection">
+        <h2>Leaderboard</h2>
+        <div className="leaderboardTabs">
+          {tabs.map((tab) => (
+            <TabButton
+              key={tab}
+              className={activeTab === tab ? "active" : ""}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </TabButton>
+          ))}
         </div>
-      </Container>
-    </>
+        <div className="activetabsection">
+          {loading ? (
+            <span>Loading...</span>
+          ) : leaderboardData ? (
+            <ul>
+              {leaderboardData.map((user: any, index: number) => (
+                <li key={index}>
+                  {index + 1}. {user.username} - {user.raidCount} raids
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span>No data available</span>
+          )}
+        </div>
+      </div>
+    </Container>
   );
 };
 
-// Styled Components
 const Container = styled.div`
   .leaderboardSection {
     background: var(--background-color);
