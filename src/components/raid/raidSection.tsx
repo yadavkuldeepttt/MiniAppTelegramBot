@@ -2,17 +2,53 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { FaCircleCheck } from "react-icons/fa6";
+import { FaSpinner } from "react-icons/fa"; // Import spinner icon
 
 const RaidSectionComponent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tweetDetails, setTweetDetails] = useState<any>(null); // State to store tweet details
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const tweetIdParams = urlParams.get("tweetId");
-  console.log(tweetIdParams, "");
+  const [raidLink, setRaidLink] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [tweetId, setTweetId] = useState<string | null>(null);
+  const [icon, setIcon] = useState<string | null>(null);
 
-  const chatId = urlParams.get("chatId");
+  useEffect(() => {
+    const fetchRaidMessage = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/last/raid-message");
+        const data = await response.json();
+
+        console.log('Fetched data:', data);
+
+        if (response.ok) {
+          const { raidLink, userId, icon } = data;
+
+          setRaidLink(raidLink);
+          setUserId(userId);
+          setIcon(icon);
+
+          // Extract tweetId from the raidLink
+          const extractedTweetId = extractPostId(raidLink);
+          setTweetId(extractedTweetId);
+        } else {
+          console.error("Error fetching raid message:", data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchRaidMessage();
+  }, []);
+
+  // Function to extract tweetId from raidLink
+  const extractPostId = (link: string) => {
+    const regex = /status\/(\d+)/; // Regex to extract tweet ID
+    const match = link.match(regex);
+    return match ? match[1] : null;
+  };
 
   // Function to fetch tweet details
   async function getTweetDetails(tweetId: string | null) {
@@ -21,43 +57,43 @@ const RaidSectionComponent: React.FC = () => {
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Set loading state to true
     try {
-      // Request the tweet details from your backend
       const response = await axios.get(
         `http://localhost:5000/api/post/get-post/${tweetId}`,
         {
           headers: {
-            "Content-Type": "application/json", // Explicitly set content type
+            "Content-Type": "application/json",
           },
         }
       );
       console.log("Response:", response.data);
-      setTweetDetails(response.data.data); // Ensure you're accessing the correct response structure
+      setTweetDetails(response.data.data);
+      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
-      console.error(
-        "Error fetching tweet details:",
-        error.response || error.message
-      );
+      console.error("Error fetching tweet details:", error);
       setError("Failed to fetch tweet details.");
+      setLoading(false); // Set loading to false in case of an error
     }
   }
 
   // Fetch the tweet details when the component mounts or tweetId changes
   useEffect(() => {
-    if (tweetIdParams) {
-      getTweetDetails(tweetIdParams);
-      console.log("====================================");
-      console.log(tweetDetails, "tweetDetails");
-      console.log("====================================");
+    if (tweetId) {
+      getTweetDetails(tweetId);
     }
-  }, [tweetIdParams]);
+  }, [tweetId]);
 
   return (
     <Container>
       <div className="raidSection">
         <div>
-          {tweetDetails ? (
+          {loading ? (
+            // Display a loading icon while fetching data
+            <LoadingIcon>
+              <FaSpinner className="spinner" />
+            </LoadingIcon>
+          ) : tweetDetails ? (
             <div className="tweet-details">
               <div className="topHeader">
                 <img src={tweetDetails.user?.profileImageUrl} alt="Profile" />
@@ -68,11 +104,7 @@ const RaidSectionComponent: React.FC = () => {
               </div>
 
               <p className="tweetDescription">{tweetDetails.text}</p>
-              {/* <p>Likes: {tweetDetails.likes}</p>
-              <p>Retweets: {tweetDetails.retweets}</p>
-              <p>Comments: {tweetDetails.comments}</p> */}
 
-              {/* Render media if available */}
               {tweetDetails.media && tweetDetails.media.length > 0 && (
                 <div className="media-section">
                   {tweetDetails.media.map((mediaItem, index) => (
@@ -85,22 +117,20 @@ const RaidSectionComponent: React.FC = () => {
                   ))}
                 </div>
               )}
-              {/* smashes */}
+
               <div className="smashes">
                 <FaCircleCheck className="icon" /> 1/35 Smashes
               </div>
 
-              {/* gif */}
               <div className="gif">
                 <img
                   src="https://raidsharksbot.com/ads/2024-10-21-Whiskey.gif"
-                  alt=""
+                  alt="GIF"
                 />
               </div>
 
-              {/* smash button */}
               <div className="smashButton">
-                <button>🦈 SMASH IT 🦈</button>
+                <button>{icon} SMASH IT {icon}</button>
               </div>
             </div>
           ) : (
@@ -165,7 +195,7 @@ const Container = styled.div`
       }
     }
     .gif {
-        margin-bottom: 2rem;
+      margin-bottom: 2rem;
       img {
         width: 100%;
         height: 100%;
@@ -176,7 +206,7 @@ const Container = styled.div`
     .smashButton {
       width: 100%;
       position: absolute;
-      bottom: 10px;
+      bottom: 0px;
       left: 0px;
       button {
         padding: 8px 12px;
@@ -184,12 +214,29 @@ const Container = styled.div`
         color: #fff;
         width: 100%;
         outline: none;
-        &:hover{
-            outline: none;
-            border: 0;
-            
+        &:hover {
+          outline: none;
+          border: 0;
         }
       }
+    }
+  }
+`;
+
+// Loading icon styling
+const LoadingIcon = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; /* Adjust height as needed */
+  .spinner {
+    font-size: 2rem;
+    color: #333;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
     }
   }
 `;
