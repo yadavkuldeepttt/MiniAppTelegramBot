@@ -19,88 +19,87 @@ const LeaderboardSection: React.FC = () => {
 
 
 
+useEffect(() => {
+  const fetchRaidMessage = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/last/raid-message"
+      );
+      const data = await response.json();
 
-  useEffect(() => {
+      console.log("Fetched data:", data);
 
-    const fetchRaidMessage = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/api/last/raid-message"
-        );
-        const data = await response.json();
-
-        console.log("Fetched data:", data);
-
-        if (response.ok) {
-          // Check if status is "Started" before setting the active tab
-          if (data.status === "Started") {
-            setActiveTab("Raid");
-          }
-          const { chatId } = data;
-
-          console.log(chatId,"chat id  ");
-          
-
-          setChatId(chatId);
-        } else {
-          console.error("Error fetching raid message:", data.message);
+      if (response.ok) {
+        if (data.status === "Started") {
+          setActiveTab("Raid");
         }
-      } catch (error) {
-        console.error("Error:", error);
+        const { chatId } = data;
+        console.log(chatId, "chat id");
+
+        setChatId(chatId);
+
+        // Call requestGroupAdmins after setting chatId
+        requestGroupAdmins(chatId);
+      } else {
+        console.error("Error fetching raid message:", data.message);
       }
-    };
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
+  // Send the user's request to get admins
+  const requestGroupAdmins = async (chatId) => {
+    if (!chatId) {
+      console.warn("chatId is not set yet.");
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:5000/getGroupAdmins/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log("Admin data:", data);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+    }
+  };
 
-    // Send the user's request to get admins
-    const requestGroupAdmins = async () => {
-      try {
-        // Assuming you have an endpoint `/getGroupAdmins` on your server
-        const response = await fetch(`http://localhost:5000/getGroupAdmins/${chatId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-         
-        });
-        const data = await response.json();
-        console.log("Admin data:", data);
-      } catch (error) {
-        console.error("Error fetching admins:", error);
+  const fetchLeaderboardData = async () => {
+    setLoading(true);
+    try {
+      let endpoint;
+      switch (activeTab) {
+        case "Day":
+          endpoint = "http://localhost:5000/api/leaderboard/today";
+          break;
+        case "Month":
+          endpoint = "http://localhost:5000/api/leaderboard/month";
+          break;
+        default:
+          endpoint = "http://localhost:5000/api/leaderboard/all-time";
+          break;
       }
-    };
 
-    const fetchLeaderboardData = async () => {
-      setLoading(true);
-      try {
-        let endpoint;
-        switch (activeTab) {
-          case "Day":
-            endpoint = "http://localhost:5000/api/leaderboard/today";
-            break;
-          case "Month":
-            endpoint = "http://localhost:5000/api/leaderboard/month";
-            break;
-          default:
-            endpoint = "http://localhost:5000/api/leaderboard/all-time";
-            break;
-        }
+      const response = await axios.get(endpoint);
+      console.log("====================================");
+      console.log(response, "response");
+      console.log("====================================");
+      setLeaderboardData(response.data);
+    } catch (error) {
+      console.error("Error fetching leaderboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const response = await axios.get(endpoint);
-        console.log("====================================");
-        console.log(response, "response");
-        console.log("====================================");
-        setLeaderboardData(response.data);
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  fetchRaidMessage();
+  fetchLeaderboardData();
+}, [activeTab]);
 
-    fetchRaidMessage();
-    requestGroupAdmins();
-    // fetchLeaderboardData();
-  }, [activeTab]);
 
   return (
     <Container>
