@@ -58,7 +58,7 @@ const LeaderboardSection: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId,
+            chatId,
             // Potentially include other data if available
           }),
         });
