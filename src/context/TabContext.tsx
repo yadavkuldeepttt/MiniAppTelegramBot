@@ -15,7 +15,7 @@ interface TabProviderProps {
 }
 
 export const TabProvider: React.FC<TabProviderProps> = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<string>("Settings");
+  const [activeTab, setActiveTab] = useState<string>("Raid");
 
   return (
     <TabContext.Provider value={{ activeTab, setActiveTab }}>
