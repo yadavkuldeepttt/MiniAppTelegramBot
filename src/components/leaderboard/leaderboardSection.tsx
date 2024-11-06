@@ -38,6 +38,9 @@ const LeaderboardSection: React.FC = () => {
           }
           const { chatId } = data;
 
+          console.log(chatId,"chat id  ");
+          
+
           setChatId(chatId);
         } else {
           console.error("Error fetching raid message:", data.message);
@@ -52,15 +55,12 @@ const LeaderboardSection: React.FC = () => {
     const requestGroupAdmins = async () => {
       try {
         // Assuming you have an endpoint `/getGroupAdmins` on your server
-        const response = await fetch("http://localhost:5000/getGroupAdmins", {
+        const response = await fetch(`http://localhost:5000/getGroupAdmins/${chatId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            chatId,
-            // Potentially include other data if available
-          }),
+         
         });
         const data = await response.json();
         console.log("Admin data:", data);
