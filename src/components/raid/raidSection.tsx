@@ -23,6 +23,10 @@ const RaidSectionComponent: React.FC = () => {
         console.log('Fetched data:', data);
 
         if (response.ok) {
+             // Check if status is "Started" before setting the active tab
+          if (data.status === "Started") {
+            setActiveTab("Raid");
+          }
           const { raidLink, userId, icon } = data;
 
           setRaidLink(raidLink);
