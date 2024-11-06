@@ -5,6 +5,7 @@ import axios from "axios";
 const LeaderboardSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("AllTime");
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
+  const [chatId, setChatId] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const tabs = ["All Time", "Month", "Day"];
 
@@ -15,17 +16,38 @@ const LeaderboardSection: React.FC = () => {
    const initData = tg.initDataUnsafe;   
    const userId = initData?.user?.id;
    const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
-   const chatId = initData?.chat?.id;
 
-   console.log(userId,"userId");
-   console.log('====================================');
-   console.log(chatId,"chat id ");
-   console.log('====================================');
-   
 
 
 
   useEffect(() => {
+
+    const fetchRaidMessage = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/last/raid-message"
+        );
+        const data = await response.json();
+
+        console.log("Fetched data:", data);
+
+        if (response.ok) {
+          // Check if status is "Started" before setting the active tab
+          if (data.status === "Started") {
+            setActiveTab("Raid");
+          }
+          const { chatId } = data;
+
+          setChatId(chatId);
+        } else {
+          console.error("Error fetching raid message:", data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+
     // Send the user's request to get admins
     const requestGroupAdmins = async () => {
       try {
@@ -75,6 +97,7 @@ const LeaderboardSection: React.FC = () => {
       }
     };
 
+    fetchRaidMessage();
     requestGroupAdmins();
     // fetchLeaderboardData();
   }, [activeTab]);
