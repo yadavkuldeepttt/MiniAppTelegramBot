@@ -77,7 +77,7 @@ const RaidSectionComponent: React.FC = () => {
     fetchRaidMessage();
   }, []);
 
- 
+
 
 
   // Function to extract tweetId from raidLink
@@ -89,6 +89,7 @@ const RaidSectionComponent: React.FC = () => {
 
   // Function to fetch tweet details
   async function getTweetDetails(tweetId: string | null) {
+    
     if (!tweetId) {
       setError("Invalid tweet ID.");
       return;
@@ -121,7 +122,8 @@ const RaidSectionComponent: React.FC = () => {
     }
   }, [tweetId]);
 
-   const smashRaid = () => {
+
+  const smashRaid = () => {
     console.log("smashingraid");
 
     if (chatId) {
@@ -159,6 +161,7 @@ const RaidSectionComponent: React.FC = () => {
       console.error("No raid link provided.");
     }
   };
+
 
   return (
     <Container>
