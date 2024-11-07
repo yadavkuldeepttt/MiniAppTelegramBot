@@ -1,105 +1,94 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
+import { LeaderboardResponse, LeaderboardData } from "../../types";
 
 const LeaderboardSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("AllTime");
-  const [leaderboardData, setLeaderboardData] = useState<any>(null);
-  const [chatId, setChatId] = useState<any>(null);
+  const [data, setData] = useState<LeaderboardResponse | null>(null);
+  const [chatId, setChatId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const tabs = ["All Time", "Month", "Day"];
+  const [error, setError] = useState<string | null>(null);
+  
+  const tg = (window as any).Telegram.WebApp;
+  const initData = tg?.initDataUnsafe;   
+  const userId = initData?.user?.id;
+  const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
 
-  const tg = window.Telegram.WebApp;
+  // Tab period names corresponding to the leaderboard data
+  const tabs = [
+    { label: "All Time", key: "allTime" },
+    { label: "Month", key: "thisMonth" },
+    { label: "Day", key: "today" },
+  ];
 
-
-   // Access initData and other WebApp data
-   const initData = tg.initDataUnsafe;   
-   const userId = initData?.user?.id;
-   const chatType = initData?.chat?.type; // can be "private", "group", "supergroup", "channel"
-
-
-
-useEffect(() => {
-  const fetchRaidMessage = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/last/raid-message"
-      );
-      const data = await response.json();
-
-      console.log("Fetched data:", data);
-
-      if (response.ok) {
-        if (data.status === "Started") {
-          setActiveTab("Raid");
-        }
-        const { chatId } = data;
-        console.log(chatId, "chat id");
-
-        setChatId(chatId);
-
-        // Call requestGroupAdmins after setting chatId
-        requestGroupAdmins(chatId);
-      } else {
-        console.error("Error fetching raid message:", data.message);
+  // Fetch raid message and leaderboard data when component mounts
+  useEffect(() => {
+    const fetchRaidMessage = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/last/raid-message");
+        const data = await response.json();
+        if (data.status === "Started") setActiveTab("Raid");
+        setChatId(data.chatId);
+      } catch (error) {
+        console.error("Error fetching raid message:", error);
       }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+    };
 
-  // Send the user's request to get admins
-  const requestGroupAdmins = async (chatId) => {
-    if (!chatId) {
-      console.warn("chatId is not set yet.");
-      return;
-    }
-    try {
-      const response = await fetch(`http://localhost:5000/getGroupAdmins/${chatId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      console.log("Admin data:", data);
-    } catch (error) {
-      console.error("Error fetching admins:", error);
-    }
-  };
-
-  const fetchLeaderboardData = async () => {
-    setLoading(true);
-    try {
-      let endpoint;
-      switch (activeTab) {
-        case "Day":
-          endpoint = "http://localhost:5000/api/leaderboard/today";
-          break;
-        case "Month":
-          endpoint = "http://localhost:5000/api/leaderboard/month";
-          break;
-        default:
-          endpoint = "http://localhost:5000/api/leaderboard/all-time";
-          break;
+    const fetchLeaderboard = async () => {
+      if (!chatId) return;
+      try {
+        const response = await axios.post<LeaderboardResponse>(`http://localhost:5000/getLeaderboard/${chatId}`);
+        setData(response.data);
+      } catch (error) {
+        setError("Unable to fetch leaderboard data.");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const response = await axios.get(endpoint);
-      console.log("====================================");
-      console.log(response, "response");
-      console.log("====================================");
-      setLeaderboardData(response.data);
-    } catch (error) {
-      console.error("Error fetching leaderboard data:", error);
-    } finally {
-      setLoading(false);
-    }
+    fetchRaidMessage();
+    fetchLeaderboard();
+  }, [chatId]);
+
+  // Renders leaderboard data for the selected tab (allTime, thisMonth, today)
+  const renderLeaderboard = (leaderboardData: LeaderboardData | undefined) => {
+    if (!leaderboardData) return <span>No data available</span>;
+
+    return (
+      <>
+        <h3>👑 Top Hosts</h3>
+        <ul>
+          {leaderboardData.topHosts.map((entry, index) => (
+            <li key={index}>
+              {index + 1}. {entry.username} - {entry.raidCount ?? entry.engagement ?? entry.participationCount} points
+            </li>
+          ))}
+        </ul>
+
+        <h3>🔥 Most Engaged Users</h3>
+        <ul>
+          {leaderboardData.mostEngaged.map((entry, index) => (
+            <li key={index}>
+              {index + 1}. {entry.username} - {entry.engagement} engagements
+            </li>
+          ))}
+        </ul>
+
+        <h3>💪 Most Frequent Participants</h3>
+        <ul>
+          {leaderboardData.mostFrequentParticipants.map((entry, index) => (
+            <li key={index}>
+              {index + 1}. {entry.username} - {entry.participationCount} participations
+            </li>
+          ))}
+        </ul>
+      </>
+    );
   };
 
-  fetchRaidMessage();
-  fetchLeaderboardData();
-}, [activeTab]);
-
+  if (loading) return <span>Loading...</span>;
+  if (error) return <span>{error}</span>;
 
   return (
     <Container>
@@ -108,25 +97,20 @@ useEffect(() => {
         <div className="leaderboardTabs">
           {tabs.map((tab) => (
             <TabButton
-              key={tab}
-              className={activeTab === tab ? "active" : ""}
-              onClick={() => setActiveTab(tab)}
+              key={tab.key}
+              className={activeTab === tab.label ? "active" : ""}
+              onClick={() => setActiveTab(tab.label)}
             >
-              {tab}
+              {tab.label}
             </TabButton>
           ))}
         </div>
         <div className="activetabsection">
-          {loading ? (
-            <span>Loading...</span>
-          ) : leaderboardData ? (
-            <ul>
-              {leaderboardData.map((user: any, index: number) => (
-                <li key={index}>
-                  {index + 1}. {user.username} - {user.raidCount} raids
-                </li>
-              ))}
-            </ul>
+          {data ? (
+            renderLeaderboard(
+              activeTab === "All Time" ? data.allTime :
+              activeTab === "Month" ? data.thisMonth : data.today
+            )
           ) : (
             <span>No data available</span>
           )}
@@ -152,7 +136,6 @@ const Container = styled.div`
       justify-content: space-between;
       align-items: center;
       border-radius: 8px;
-      box-shadow: none;
       width: 100%;
       padding: 5px;
       background-color: rgb(57, 61, 64);
