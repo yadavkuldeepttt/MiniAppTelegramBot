@@ -17,15 +17,17 @@ const RaidSectionComponent: React.FC = () => {
   useEffect(() => {
     const fetchRaidMessage = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/last/raid-message");
+        const response = await fetch(
+          "http://localhost:5000/api/last/raid-message"
+        );
         const data = await response.json();
 
-        console.log('Fetched data:', data);
+        console.log("Fetched data:", data);
 
         if (response.ok) {
+          // Check if status is "Started" before setting the active tab
         
           const { raidLink, userId, icon } = data;
-
           setRaidLink(raidLink);
           setUserId(userId);
           setIcon(icon);
@@ -43,6 +45,27 @@ const RaidSectionComponent: React.FC = () => {
 
     fetchRaidMessage();
   }, []);
+
+
+  const smashRaid = ()=>{
+    console.log("smashingraid");
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get("action");
+    const chatId = urlParams.get("chatId");
+
+    if (action === "smash_raid" && chatId) {
+      // Make an API request to your backend to trigger `smashRaid`
+      axios.post(`http://localhost:5000/api/smashRaid`, { chatId })
+        .then(response => {
+          console.log("Raid triggered successfully:", response.data);
+        })
+        .catch(error => {
+          console.error("Error triggering raid:", error);
+        });
+    }
+  }
+
 
   // Function to extract tweetId from raidLink
   const extractPostId = (link: string) => {
@@ -131,7 +154,9 @@ const RaidSectionComponent: React.FC = () => {
               </div>
 
               <div className="smashButton">
-                <button>{icon} SMASH IT {icon}</button>
+                <button onClick={smashRaid}>
+                  {icon} SMASH IT {icon}
+                </button>
               </div>
             </div>
           ) : (
