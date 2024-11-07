@@ -13,6 +13,19 @@ const RaidSectionComponent: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [tweetId, setTweetId] = useState<string | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
+  
+   // Initialize Telegram WebApp
+   const tg = window.Telegram.WebApp;
+
+
+
+   // Access initData and other WebApp data
+   const initData = tg.initDataUnsafe;
+   console.log(initData,"init data");
+   
+
+
 
   useEffect(() => {
     const fetchRaidMessage = async () => {
@@ -27,10 +40,11 @@ const RaidSectionComponent: React.FC = () => {
         if (response.ok) {
           // Check if status is "Started" before setting the active tab
         
-          const { raidLink, userId, icon } = data;
+          const { raidLink, userId, icon,chatId } = data;
           setRaidLink(raidLink);
           setUserId(userId);
           setIcon(icon);
+          setChatId(chatId);
 
           // Extract tweetId from the raidLink
           const extractedTweetId = extractPostId(raidLink);
@@ -49,16 +63,10 @@ const RaidSectionComponent: React.FC = () => {
 
   const smashRaid = ()=>{
     console.log("smashingraid");
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get("action");
-    const chatId = urlParams.get("chatId");
-
-    console.log(action,"action",chatId,"chatId");
-
-    if (action === "smash_raid" && chatId) {
+  
+    if (chatId) {
       // Make an API request to your backend to trigger `smashRaid`
-      axios.post(`http://localhost:5000/api/smashRaid`, { chatId })
+      axios.post(`http://localhost:5000/api/smashRaid/${chatId}`)
         .then(response => {
           console.log("Raid triggered successfully:", response.data);
         })
