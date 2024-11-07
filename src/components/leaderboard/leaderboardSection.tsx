@@ -27,7 +27,12 @@ const LeaderboardSection: React.FC = () => {
         const response = await fetch("http://localhost:5000/api/last/raid-message");
         const data = await response.json();
         console.log(data, "data^^^^^^^^66");
-        setChatId(data.chatId);
+           if (data?.lastRaidMessage?.chatId) {
+        setChatId(data.lastRaidMessage.chatId);
+      } else {
+        console.error("Chat ID not found in the response");
+      }
+      
       } catch (error) {
         console.error("Error fetching raid message:", error);
         setError("Unable to fetch raid message.");
