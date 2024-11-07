@@ -14,18 +14,20 @@ const RaidSectionComponent: React.FC = () => {
   const [tweetId, setTweetId] = useState<string | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
-  
-   // Initialize Telegram WebApp
-   const tg = window.Telegram.WebApp;
 
+  const [messageId, setMessageId] = useState<string | null>(null);
+  const [target, setTarget] = useState<string | null>(null);
+  const [smashes, setSmashes] = useState<string | null>(null);
 
+  // Initialize Telegram WebApp
+  const tg = window.Telegram.WebApp;
 
-   // Access initData and other WebApp data
-   const initData = tg.initDataUnsafe;
-   console.log(initData,"init data");
-   
+  // Access initData and other WebApp data
+  const initData = tg.initDataUnsafe;
+  console.log(initData, "init data");
 
-
+  const userID = initData?.user?.id;
+  const userName = initData?.user?.first_name;
 
   useEffect(() => {
     const fetchRaidMessage = async () => {
@@ -38,17 +40,32 @@ const RaidSectionComponent: React.FC = () => {
         console.log("Fetched data:", data);
 
         if (response.ok) {
-          // Check if status is "Started" before setting the active tab
-        
-          const { raidLink, userId, icon,chatId } = data;
-          setRaidLink(raidLink);
-          setUserId(userId);
-          setIcon(icon);
-          setChatId(chatId);
+          // Extract lastRaidMessage and lastActiveRaid from the response
+          const { lastRaidMessage, lastActiveRaid } = data;
 
-          // Extract tweetId from the raidLink
-          const extractedTweetId = extractPostId(raidLink);
-          setTweetId(extractedTweetId);
+          // Destructure fields from lastRaidMessage if available
+          if (lastRaidMessage) {
+            const { raidLink, userId, icon, chatId, messageId } =
+              lastRaidMessage;
+            setRaidLink(raidLink);
+            setUserId(userId);
+            setIcon(icon);
+            setChatId(chatId);
+            setMessageId(messageId);
+          }
+
+          // Extract tweetId from raidLink if available
+          if (raidLink) {
+            const extractedTweetId = extractPostId(raidLink);
+            setTweetId(extractedTweetId);
+          }
+          // Optionally, you can also access lastActiveRaid if needed
+          if (lastActiveRaid) {
+            const { target, smashes } = lastActiveRaid;
+            // Handle smashes and targets as needed
+            setTarget(target);
+            setSmashes(smashes);
+          }
         } else {
           console.error("Error fetching raid message:", data.message);
         }
@@ -60,21 +77,45 @@ const RaidSectionComponent: React.FC = () => {
     fetchRaidMessage();
   }, []);
 
-
-  const smashRaid = ()=>{
+  const smashRaid = () => {
     console.log("smashingraid");
-  
+
     if (chatId) {
-      // Make an API request to your backend to trigger `smashRaid`
-      axios.post(`http://localhost:5000/api/smashRaid/${chatId}`)
-        .then(response => {
-          console.log("Raid triggered successfully:", response.data);
-        })
-        .catch(error => {
-          console.error("Error triggering raid:", error);
-        });
+      if (messageId && userID && userName) {
+        const payload = {
+          messageId,
+          userID,
+          userName,
+        };
+
+        // Make an API request to your backend to trigger `smashRaid`
+        axios
+          .post(`http://localhost:5000/api/smashRaid/${chatId}`, payload)
+          .then((response) => {
+            console.log("Raid triggered successfully:", response.data);
+            if (response.data.success) {
+              console.log("Raid triggered successfully:", response.data);
+              openMiniApp(); // Pass the link to `openMiniApp` function
+            } else {
+              console.log("Raid could not be started:", response.data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error triggering raid:", error);
+          });
+      }
     }
-  }
+  };
+
+
+  const openMiniApp = () => {
+    if (raidLink) {
+      window.open(raidLink, "_blank");
+    } else {
+      console.error("No raid link provided.");
+    }
+  };
+
 
 
   // Function to extract tweetId from raidLink
@@ -153,7 +194,7 @@ const RaidSectionComponent: React.FC = () => {
               )}
 
               <div className="smashes">
-                <FaCircleCheck className="icon" /> 1/35 Smashes
+                <FaCircleCheck className="icon" /> {smashes}/{target} Smashes
               </div>
 
               <div className="gif">
