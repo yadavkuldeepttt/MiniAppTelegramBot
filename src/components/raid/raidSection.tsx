@@ -157,13 +157,13 @@ const RaidSectionComponent: React.FC = () => {
   };
 
 
-  const openMiniApp = () => {
-    if (raidLink) {
-      window.open(raidLink, "_blank");
-    } else {
-      console.error("No raid link provided.");
-    }
-  };
+const openMiniApp = () => {
+  if (raidLink) {
+    window.open(raidLink, "_self");
+  } else {
+    console.error("No raid link provided.");
+  }
+};
 
 
   return (
