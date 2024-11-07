@@ -54,6 +54,8 @@ const RaidSectionComponent: React.FC = () => {
     const action = urlParams.get("action");
     const chatId = urlParams.get("chatId");
 
+    console.log(action,"action",chatId,"chatId");
+
     if (action === "smash_raid" && chatId) {
       // Make an API request to your backend to trigger `smashRaid`
       axios.post(`http://localhost:5000/api/smashRaid`, { chatId })
