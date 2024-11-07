@@ -26,7 +26,7 @@ const LeaderboardSection: React.FC = () => {
       try {
         const response = await fetch("http://localhost:5000/api/last/raid-message");
         const data = await response.json();
-        
+        console.log(data,"data^^^^^^^^66");
         setChatId(data.chatId);
       } catch (error) {
         console.error("Error fetching raid message:", error);
@@ -37,6 +37,7 @@ const LeaderboardSection: React.FC = () => {
       if (!chatId) return;
       try {
         const response = await axios.post<LeaderboardResponse>(`http://localhost:5000/getLeaderboard/${chatId}`);
+        console.log(response,"response^^^^^^^^66");
         setData(response.data);
       } catch (error) {
         setError("Unable to fetch leaderboard data.");
