@@ -39,6 +39,7 @@ const LeaderboardSection: React.FC = () => {
       if (!chatId) return;
       try {
         const response = await axios.post<LeaderboardResponse>(`http://localhost:5000/getLeaderboard/${chatId}`);
+        console.log(response,"response getting");
         setData(response.data);
       } catch (error) {
         setError("Unable to fetch leaderboard data.");
