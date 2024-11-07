@@ -77,45 +77,7 @@ const RaidSectionComponent: React.FC = () => {
     fetchRaidMessage();
   }, []);
 
-  const smashRaid = () => {
-    console.log("smashingraid");
-
-    if (chatId) {
-      if (messageId && userID && userName) {
-        const payload = {
-          messageId,
-          userID,
-          userName,
-        };
-
-        // Make an API request to your backend to trigger `smashRaid`
-        axios
-          .post(`http://localhost:5000/api/smashRaid/${chatId}`, payload)
-          .then((response) => {
-            console.log("Raid triggered successfully:", response.data);
-            if (response.data.success) {
-              console.log("Raid triggered successfully:", response.data);
-              openMiniApp(); // Pass the link to `openMiniApp` function
-            } else {
-              console.log("Raid could not be started:", response.data.message);
-            }
-          })
-          .catch((error) => {
-            console.error("Error triggering raid:", error);
-          });
-      }
-    }
-  };
-
-
-  const openMiniApp = () => {
-    if (raidLink) {
-      window.open(raidLink, "_blank");
-    } else {
-      console.error("No raid link provided.");
-    }
-  };
-
+ 
 
 
   // Function to extract tweetId from raidLink
@@ -158,6 +120,45 @@ const RaidSectionComponent: React.FC = () => {
       getTweetDetails(tweetId);
     }
   }, [tweetId]);
+
+   const smashRaid = () => {
+    console.log("smashingraid");
+
+    if (chatId) {
+      if (messageId && userID && userName) {
+        const payload = {
+          messageId,
+          userID,
+          userName,
+        };
+
+        // Make an API request to your backend to trigger `smashRaid`
+        axios
+          .post(`http://localhost:5000/api/smashRaid/${chatId}`, payload)
+          .then((response) => {
+            console.log("Raid triggered successfully:", response.data);
+            if (response.data.success) {
+              console.log("Raid triggered successfully:", response.data);
+              openMiniApp(); // Pass the link to `openMiniApp` function
+            } else {
+              console.log("Raid could not be started:", response.data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error triggering raid:", error);
+          });
+      }
+    }
+  };
+
+
+  const openMiniApp = () => {
+    if (raidLink) {
+      window.open(raidLink, "_blank");
+    } else {
+      console.error("No raid link provided.");
+    }
+  };
 
   return (
     <Container>
