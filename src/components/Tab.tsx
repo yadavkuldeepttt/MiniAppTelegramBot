@@ -5,7 +5,7 @@ import { useTabContext } from "../context/TabContext"; // Import Tab Context
 const TabComponent: React.FC = () => {
   const { activeTab, setActiveTab } = useTabContext(); // Access context values
 
-  const tabs = [{ name: "Raid" }, { name: "Summary" }, { name: "Leaderboard" }];
+  const tabs = [{ name: "Raid" }, { name: "Leaderboard" }];
 
   return (
     <TabContainer>
