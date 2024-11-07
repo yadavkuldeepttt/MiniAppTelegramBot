@@ -52,13 +52,11 @@ const RaidSectionComponent: React.FC = () => {
             setIcon(icon);
             setChatId(chatId);
             setMessageId(messageId);
-          }
 
-          // Extract tweetId from raidLink if available
-          if (raidLink) {
             const extractedTweetId = extractPostId(raidLink);
             setTweetId(extractedTweetId);
           }
+
           // Optionally, you can also access lastActiveRaid if needed
           if (lastActiveRaid) {
             const { target, smashes } = lastActiveRaid;
@@ -117,7 +115,12 @@ const RaidSectionComponent: React.FC = () => {
 
   // Fetch the tweet details when the component mounts or tweetId changes
   useEffect(() => {
+    console.log(tweetId,"tweetId");
+    
     if (tweetId) {
+      console.log('====================================');
+      console.log("entered");
+      console.log('====================================');
       getTweetDetails(tweetId);
     }
   }, [tweetId]);
