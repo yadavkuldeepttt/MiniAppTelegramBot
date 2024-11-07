@@ -26,29 +26,36 @@ const LeaderboardSection: React.FC = () => {
       try {
         const response = await fetch("http://localhost:5000/api/last/raid-message");
         const data = await response.json();
-        console.log(data,"data^^^^^^^^66");
+        console.log(data, "data^^^^^^^^66");
         setChatId(data.chatId);
       } catch (error) {
         console.error("Error fetching raid message:", error);
+        setError("Unable to fetch raid message.");
+        setLoading(false); // Stop loading in case of an error
       }
     };
+    
+    fetchRaidMessage();
+  }, []);
 
+  useEffect(() => {
     const fetchLeaderboard = async () => {
       if (!chatId) return;
+      setLoading(true); // Start loading here before fetching data
       try {
         const response = await axios.post<LeaderboardResponse>(`http://localhost:5000/getLeaderboard/${chatId}`);
-        console.log(response,"response^^^^^^^^66");
+        console.log(response, "response^^^^^^^^66");
         setData(response.data);
+        setError(null); // Reset error on successful fetch
       } catch (error) {
         setError("Unable to fetch leaderboard data.");
       } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading regardless of success or failure
       }
     };
 
-    fetchRaidMessage();
     fetchLeaderboard();
-  }, [chatId]);
+  }, [chatId]); // Fetch leaderboard whenever chatId changes
 
   const renderLeaderboard = (leaderboardData: LeaderboardData | undefined) => {
     if (!leaderboardData) return <NoDataText>No data available for this period</NoDataText>;
@@ -202,4 +209,4 @@ const NoDataText = styled.span`
   margin-top: 1rem;
 `;
 
-export default LeaderboardSection;
+export default LeaderboardSection
