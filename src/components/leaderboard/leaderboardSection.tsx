@@ -176,12 +176,19 @@ const Container = styled.div`
       padding: 5px;
     }
 
-    .activeTabSection {
+     .activeTabSection {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: start;
       margin: 2rem 0;
       color: #d1d5db;
+      h3{
+        font-weight: 600!important;
+      }
+      ul{
+        padding-bottom: 1rem;
+        margin-left: 2.5rem;
+      }
     }
   }
 `;
